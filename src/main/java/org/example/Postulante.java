@@ -8,5 +8,5 @@ public class Postulante{
         this.apellido = apellido;
         this.cv = cv;
     }
-a
+
 }
