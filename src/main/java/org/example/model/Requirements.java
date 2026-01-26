@@ -1,6 +1,8 @@
 package org.example.model;
 
 import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Requirements {
 
@@ -19,7 +21,7 @@ public class Requirements {
         }
 
         this.minExperienceYears = minExperienceYears;
-        this.technologies = Set.copyOf(technologies); // inmutable
+        this.technologies = normalizeTechnologies(technologies);
         this.nivelIngles = nivelIngles;
         this.tituloUniversitario = tituloUniversitario;
     }
@@ -38,5 +40,14 @@ public class Requirements {
 
     public boolean requiereTituloUniversitario() {
         return tituloUniversitario;
+    }
+
+    private Set<String> normalizeTechnologies(Set<String> techs) {
+        return techs.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toUpperCase)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }
