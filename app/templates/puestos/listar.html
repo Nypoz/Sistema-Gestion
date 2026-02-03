@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Puestos - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-briefcase"></i> Puestos</h2>
+    <a href="{{ url_for('puestos.nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Puesto
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label class="form-label mb-0">Estado:</label>
+            </div>
+            <div class="col-auto">
+                <select name="estado" class="form-select" onchange="this.form.submit()">
+                    <option value="todos" {% if estado_actual == 'todos' %}selected{% endif %}>Todos</option>
+                    {% for estado in estados %}
+                    <option value="{{ estado.value }}" {% if estado_actual == estado.value %}selected{% endif %}>
+                        {{ estado.value|capitalize }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de puestos -->
+{% if puestos %}
+<div class="row">
+    {% for puesto in puestos %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ puesto.titulo }}</h5>
+                    <span class="badge bg-{% if puesto.estado.value == 'abierto' %}success{% elif puesto.estado.value == 'pausado' %}warning{% else %}secondary{% endif %}">
+                        {{ puesto.estado.value|capitalize }}
+                    </span>
+                </div>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    <i class="bi bi-building"></i> {{ puesto.empresa }}
+                </h6>
+
+                <div class="mb-3">
+                    {% if puesto.ubicacion %}
+                    <small class="text-muted d-block">
+                        <i class="bi bi-geo-alt"></i> {{ puesto.ubicacion }}
+                    </small>
+                    {% endif %}
+                    {% if puesto.modalidad %}
+                    <small class="text-muted d-block">
+                        <i class="bi bi-laptop"></i> {{ puesto.modalidad|capitalize }}
+                    </small>
+                    {% endif %}
+                </div>
+
+                <!-- Requisitos resumidos -->
+                <div class="mb-3">
+                    {% if puesto.experiencia_minima %}
+                    <span class="tech-badge"><i class="bi bi-clock"></i> {{ puesto.experiencia_minima }}+ años</span>
+                    {% endif %}
+                    {% if puesto.nivel_ingles and puesto.nivel_ingles.value > 0 %}
+                    <span class="tech-badge"><i class="bi bi-translate"></i> {{ puesto.nivel_ingles }}</span>
+                    {% endif %}
+                    {% if puesto.requiere_titulo %}
+                    <span class="tech-badge"><i class="bi bi-mortarboard"></i> Título</span>
+                    {% endif %}
+                </div>
+
+                <!-- Tecnologías -->
+                {% if puesto.tecnologias %}
+                <div class="mb-3">
+                    {% for tech in puesto.get_tecnologias_list()[:5] %}
+                    <span class="tech-badge">{{ tech }}</span>
+                    {% endfor %}
+                    {% if puesto.get_tecnologias_list()|length > 5 %}
+                    <span class="tech-badge">+{{ puesto.get_tecnologias_list()|length - 5 }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        <i class="bi bi-people"></i> {{ puesto.postulaciones.count() }} postulaciones
+                    </span>
+                    <a href="{{ url_for('puestos.ver', id=puesto.id) }}" class="btn btn-sm btn-outline-primary">
+                        Ver detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-briefcase display-1 text-muted"></i>
+    <p class="text-muted mt-3">No hay puestos registrados</p>
+    <a href="{{ url_for('puestos.nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Crear primer puesto
+    </a>
+</div>
+{% endif %}
+{% endblock %}

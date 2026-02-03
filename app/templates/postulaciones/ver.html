@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Postulación - {{ postulacion.postulante.nombre_completo }} - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('puestos.ver', id=postulacion.puesto.id) }}">{{ postulacion.puesto.titulo }}</a></li>
+            <li class="breadcrumb-item active">{{ postulacion.postulante.nombre_completo }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Detalle de Postulación</h5>
+                <span class="badge badge-{{ postulacion.estado.value }} fs-6">{{ postulacion.estado }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Postulante</h6>
+                        <h5>
+                            <a href="{{ url_for('postulantes.ver', id=postulacion.postulante.id) }}">
+                                {{ postulacion.postulante.nombre_completo }}
+                            </a>
+                        </h5>
+                        <p class="text-muted mb-0">{{ postulacion.postulante.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Puesto</h6>
+                        <h5>
+                            <a href="{{ url_for('puestos.ver', id=postulacion.puesto.id) }}">
+                                {{ postulacion.puesto.titulo }}
+                            </a>
+                        </h5>
+                        <p class="text-muted mb-0">{{ postulacion.puesto.empresa }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Evaluación -->
+                <h6>Evaluación Automática</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4 text-center">
+                        <div class="display-4 {% if postulacion.puntaje >= 75 %}text-success{% elif postulacion.puntaje >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ postulacion.puntaje or 0 }}%
+                        </div>
+                        <p class="text-muted">Puntaje</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        {% if postulacion.cumple_requisitos %}
+                        <div class="display-4 text-success"><i class="bi bi-check-circle"></i></div>
+                        <p class="text-success">Cumple requisitos</p>
+                        {% else %}
+                        <div class="display-4 text-danger"><i class="bi bi-x-circle"></i></div>
+                        <p class="text-danger">No cumple requisitos</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="display-4 text-muted">
+                            <i class="bi bi-calendar"></i>
+                        </div>
+                        <p class="text-muted">{{ postulacion.created_at.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                </div>
+
+                <!-- Detalles de evaluación -->
+                {% if postulacion.notas %}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Detalle de evaluación:</h6>
+                        <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ postulacion.notas }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Comparación de perfiles -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Comparación: Candidato vs Requisitos</h6>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Criterio</th>
+                            <th>Requisito</th>
+                            <th>Candidato</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Experiencia</td>
+                            <td>{{ postulacion.puesto.experiencia_minima or 0 }}+ años</td>
+                            <td>{{ postulacion.postulante.experiencia_detectada or 'No detectada' }} {% if postulacion.postulante.experiencia_detectada %}años{% endif %}</td>
+                            <td>
+                                {% if postulacion.postulante.experiencia_detectada and postulacion.postulante.experiencia_detectada >= (postulacion.puesto.experiencia_minima or 0) %}
+                                <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Nivel de inglés</td>
+                            <td>{{ postulacion.puesto.nivel_ingles }}</td>
+                            <td>{{ postulacion.postulante.nivel_ingles_detectado or 'No detectado' }}</td>
+                            <td>
+                                {% set nivel_req = {'NO_REQUERIDO': 0, 'BASICO': 1, 'INTERMEDIO': 2, 'AVANZADO': 3, 'FLUIDO': 4} %}
+                                {% set nivel_cand = {'BASICO': 1, 'INTERMEDIO': 2, 'AVANZADO': 3, 'FLUIDO': 4} %}
+                                {% if postulacion.puesto.nivel_ingles.name == 'NO_REQUERIDO' or (postulacion.postulante.nivel_ingles_detectado and nivel_cand.get(postulacion.postulante.nivel_ingles_detectado, 0) >= nivel_req.get(postulacion.puesto.nivel_ingles.name, 0)) %}
+                                <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Título universitario</td>
+                            <td>{% if postulacion.puesto.requiere_titulo %}Requerido{% else %}No requerido{% endif %}</td>
+                            <td>{% if postulacion.postulante.tiene_titulo_detectado %}Detectado{% else %}No detectado{% endif %}</td>
+                            <td>
+                                {% if not postulacion.puesto.requiere_titulo or postulacion.postulante.tiene_titulo_detectado %}
+                                <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Tecnologías -->
+                <h6 class="mt-4">Tecnologías</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">Requeridas:</small>
+                        <div class="mt-1">
+                            {% for tech in postulacion.puesto.get_tecnologias_list() %}
+                            {% if tech in postulacion.postulante.get_tecnologias_detectadas_list() %}
+                            <span class="tech-badge bg-success text-white">{{ tech }}</span>
+                            {% else %}
+                            <span class="tech-badge bg-danger text-white">{{ tech }}</span>
+                            {% endif %}
+                            {% endfor %}
+                            {% if not postulacion.puesto.get_tecnologias_list() %}
+                            <span class="text-muted">Ninguna especificada</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Candidato tiene:</small>
+                        <div class="mt-1">
+                            {% for tech in postulacion.postulante.get_tecnologias_detectadas_list() %}
+                            <span class="tech-badge">{{ tech }}</span>
+                            {% endfor %}
+                            {% if not postulacion.postulante.get_tecnologias_detectadas_list() %}
+                            <span class="text-muted">Ninguna detectada</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Cambiar Estado</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('postulaciones.cambiar_estado', id=postulacion.id) }}">
+                    <div class="d-grid gap-2">
+                        {% for estado in estados %}
+                        <button type="submit" name="estado" value="{{ estado.value }}"
+                                class="btn btn-{% if postulacion.estado == estado %}primary{% else %}outline-secondary{% endif %}">
+                            {{ estado }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Acciones</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if postulacion.postulante.cv_filename %}
+                    <a href="{{ url_for('postulantes.descargar_cv', id=postulacion.postulante.id) }}"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-pdf"></i> Descargar CV
+                    </a>
+                    {% endif %}
+
+                    <a href="mailto:{{ postulacion.postulante.email }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-envelope"></i> Enviar email
+                    </a>
+
+                    <form method="post" action="{{ url_for('postulaciones.eliminar', id=postulacion.id) }}"
+                          onsubmit="return confirm('¿Eliminar esta postulación?')">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i> Eliminar postulación
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

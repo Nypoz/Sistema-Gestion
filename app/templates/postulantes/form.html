@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{% if postulante %}Editar{% else %}Nuevo{% endif %} Postulante - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('postulantes.listar') }}">Postulantes</a></li>
+            <li class="breadcrumb-item active">{% if postulante %}Editar{% else %}Nuevo{% endif %}</li>
+        </ol>
+    </nav>
+    <h2>{% if postulante %}Editar Postulante{% else %}Nuevo Postulante{% endif %}</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" name="nombre" class="form-control" required
+                                   value="{{ postulante.nombre if postulante else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Apellido *</label>
+                            <input type="text" name="apellido" class="form-control" required
+                                   value="{{ postulante.apellido if postulante else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-control" required
+                                   value="{{ postulante.email if postulante else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" name="telefono" class="form-control"
+                                   value="{{ postulante.telefono if postulante else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            CV (PDF o DOCX)
+                            {% if postulante and postulante.cv_filename %}
+                            <span class="text-muted">- Subir nuevo para reemplazar</span>
+                            {% endif %}
+                        </label>
+                        <input type="file" name="cv" class="form-control" accept=".pdf,.docx,.doc">
+                        {% if postulante and postulante.cv_filename %}
+                        <small class="text-muted">
+                            Archivo actual: {{ postulante.cv_filename }}
+                            <a href="{{ url_for('postulantes.descargar_cv', id=postulante.id) }}">[Descargar]</a>
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('postulantes.listar') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            {% if postulante %}Guardar cambios{% else %}Crear postulante{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Información</h6>
+                <p class="small text-muted">
+                    Al subir un CV, el sistema automáticamente extraerá:
+                </p>
+                <ul class="small text-muted">
+                    <li>Años de experiencia</li>
+                    <li>Tecnologías mencionadas</li>
+                    <li>Nivel de inglés</li>
+                    <li>Si tiene título universitario</li>
+                </ul>
+                <p class="small text-muted mb-0">
+                    Esta información se usará para evaluar automáticamente si cumple
+                    los requisitos de cada puesto al que postule.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
