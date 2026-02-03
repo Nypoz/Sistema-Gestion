@@ -50,11 +50,11 @@ def create_app(config_class=Config):
 
 def _create_default_admin():
     from app.models import Usuario
-    if not Usuario.query.filter_by(email='admin@tuconsultora.com').first():
+    if not Usuario.query.filter_by(email='carolina@lasteniahr.com').first():
         admin = Usuario(
-            email='admin@tuconsultora.com',
-            nombre='Administrador'
+            email='carolina@lasteniahr.com',
+            nombre='Carolina'
         )
-        admin.set_password('admin123')  # Cambiar en producción
+        admin.set_password('admin123')
         db.session.add(admin)
         db.session.commit()
