@@ -1,0 +1,93 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}Vacantes Disponibles - Lastenia HR{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3">Vacantes Disponibles</h1>
+        <p class="lead opacity-75 mb-0">Encontrá la oportunidad que estás buscando</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    {% if puestos %}
+    <div class="row">
+        {% for puesto in puestos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card card-vacante h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ puesto.titulo }}</h5>
+                    <h6 class="card-subtitle mb-3 text-muted">
+                        <i class="bi bi-building"></i> {{ puesto.empresa }}
+                    </h6>
+
+                    <div class="mb-3">
+                        {% if puesto.ubicacion %}
+                        <div class="mb-2">
+                            <i class="bi bi-geo-alt text-muted"></i>
+                            <small>{{ puesto.ubicacion }}</small>
+                        </div>
+                        {% endif %}
+                        {% if puesto.modalidad %}
+                        <div class="mb-2">
+                            <i class="bi bi-laptop text-muted"></i>
+                            <small>{{ puesto.modalidad|capitalize }}</small>
+                        </div>
+                        {% endif %}
+                        {% if puesto.experiencia_minima %}
+                        <div class="mb-2">
+                            <i class="bi bi-clock text-muted"></i>
+                            <small>{{ puesto.experiencia_minima }}+ años de experiencia</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if puesto.tecnologias %}
+                    <div class="mb-3">
+                        {% for tech in puesto.get_tecnologias_list()[:4] %}
+                        <span class="tech-badge">{{ tech }}</span>
+                        {% endfor %}
+                        {% if puesto.get_tecnologias_list()|length > 4 %}
+                        <span class="tech-badge">+{{ puesto.get_tecnologias_list()|length - 4 }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if puesto.salario_min or puesto.salario_max %}
+                    <p class="mb-3" style="color: var(--accent-color); font-weight: 500;">
+                        <i class="bi bi-cash"></i>
+                        {% if puesto.salario_min and puesto.salario_max %}
+                            ${{ "{:,}".format(puesto.salario_min) }} - ${{ "{:,}".format(puesto.salario_max) }}
+                        {% elif puesto.salario_min %}
+                            Desde ${{ "{:,}".format(puesto.salario_min) }}
+                        {% else %}
+                            Hasta ${{ "{:,}".format(puesto.salario_max) }}
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0 pb-4">
+                    <a href="{{ url_for('public.vacante_detalle', id=puesto.id) }}" class="btn btn-accent w-100">
+                        Ver más y postularme
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-briefcase" style="font-size: 5rem; color: var(--text-muted); opacity: 0.3;"></i>
+        </div>
+        <h4 class="text-muted">No hay vacantes disponibles en este momento</h4>
+        <p class="text-muted">Seguinos en Instagram para enterarte de nuevas oportunidades</p>
+        <a href="https://www.instagram.com/lasteniahr/" target="_blank" class="btn btn-accent mt-3">
+            <i class="bi bi-instagram"></i> Seguir @lasteniahr
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

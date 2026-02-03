@@ -1,10 +1,12 @@
 from flask import Blueprint, render_template
+from flask_login import login_required
 from app.models import Puesto, Postulante, Postulacion, EstadoPuesto
 
 bp = Blueprint('main', __name__)
 
 
 @bp.route('/')
+@login_required
 def index():
     """Dashboard principal."""
     puestos_abiertos = Puesto.query.filter_by(estado=EstadoPuesto.ABIERTO).count()

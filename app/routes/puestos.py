@@ -1,9 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required
 from app import db
 from app.models import Puesto, Postulacion, NivelIngles, EstadoPuesto, EstadoPostulacion
 from app.services.postulacion_service import PostulacionService
 
-bp = Blueprint('puestos', __name__, url_prefix='/puestos')
+bp = Blueprint('puestos', __name__)
+
+
+# Proteger todas las rutas de este blueprint
+@bp.before_request
+@login_required
+def require_login():
+    pass
 
 
 @bp.route('/')

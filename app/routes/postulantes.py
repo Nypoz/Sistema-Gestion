@@ -1,10 +1,18 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_from_directory
+from flask_login import login_required
 from app import db
 from app.models import Postulante, Puesto, EstadoPuesto
 from app.services.postulacion_service import PostulacionService
 import os
 
-bp = Blueprint('postulantes', __name__, url_prefix='/postulantes')
+bp = Blueprint('postulantes', __name__)
+
+
+# Proteger todas las rutas de este blueprint
+@bp.before_request
+@login_required
+def require_login():
+    pass
 
 
 def allowed_file(filename):

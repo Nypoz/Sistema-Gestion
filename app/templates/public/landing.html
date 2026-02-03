@@ -1,0 +1,137 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}Lastenia HR - Encontrá tu próximo desafío profesional{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero text-center">
+    <div class="container position-relative">
+        <h1>Encontrá tu próximo<br>desafío profesional</h1>
+        <p class="lead mb-4">Conectamos el mejor talento con las empresas más innovadoras del mercado</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('public.vacantes') }}" class="btn btn-accent btn-lg">
+                <i class="bi bi-search"></i> Ver {{ puestos_abiertos }} vacantes disponibles
+            </a>
+            <a href="https://www.instagram.com/lasteniahr/" target="_blank" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-instagram"></i> Seguinos
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h2 class="display-4 fw-bold" style="color: var(--accent-color);">+500</h2>
+                <p class="text-muted mb-0">Candidatos colocados</p>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h2 class="display-4 fw-bold" style="color: var(--accent-color);">+50</h2>
+                <p class="text-muted mb-0">Empresas confían en nosotros</p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="display-4 fw-bold" style="color: var(--accent-color);">98%</h2>
+                <p class="text-muted mb-0">Satisfacción de clientes</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-5" style="background: var(--light-accent);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">¿Por qué elegirnos?</h2>
+            <p class="section-subtitle">Te acompañamos en cada paso de tu búsqueda laboral</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="feature-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <h5>Proceso Ágil</h5>
+                    <p class="text-muted mb-0">Postulate en menos de 2 minutos. Solo subí tu CV y nosotros hacemos el resto.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="feature-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h5>Empresas Top</h5>
+                    <p class="text-muted mb-0">Trabajamos con las mejores empresas del mercado argentino e internacional.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="feature-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <h5>Acompañamiento</h5>
+                    <p class="text-muted mb-0">Te guiamos durante todo el proceso de selección hasta que consigas el trabajo ideal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vacantes destacadas -->
+{% if puestos_destacados %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Vacantes Destacadas</h2>
+            <p class="section-subtitle">Las últimas oportunidades que tenemos para vos</p>
+        </div>
+        <div class="row">
+            {% for puesto in puestos_destacados[:3] %}
+            <div class="col-md-4 mb-4">
+                <div class="card card-vacante h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ puesto.titulo }}</h5>
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            <i class="bi bi-building"></i> {{ puesto.empresa }}
+                        </h6>
+                        {% if puesto.modalidad %}
+                        <span class="tech-badge">
+                            <i class="bi bi-laptop"></i> {{ puesto.modalidad|capitalize }}
+                        </span>
+                        {% endif %}
+                        {% if puesto.ubicacion %}
+                        <span class="tech-badge">
+                            <i class="bi bi-geo-alt"></i> {{ puesto.ubicacion }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <a href="{{ url_for('public.vacante_detalle', id=puesto.id) }}" class="btn btn-accent w-100">
+                            Ver más
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('public.vacantes') }}" class="btn btn-outline-primary btn-lg">
+                Ver todas las vacantes <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;">
+    <div class="container text-center">
+        <h3 class="mb-3">¿Listo para dar el siguiente paso en tu carrera?</h3>
+        <p class="mb-4 opacity-75">Explorá nuestras vacantes y encontrá la oportunidad ideal para vos</p>
+        <a href="{{ url_for('public.vacantes') }}" class="btn btn-light btn-lg">
+            Explorar vacantes <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</section>
+{% endblock %}
