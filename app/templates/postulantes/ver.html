@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ postulante.nombre_completo }} - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('postulantes.listar') }}">Postulantes</a></li>
+            <li class="breadcrumb-item active">{{ postulante.nombre_completo }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <!-- Info del postulante -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>{{ postulante.nombre_completo }}</h4>
+
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <a href="mailto:{{ postulante.email }}">{{ postulante.email }}</a>
+                    </li>
+                    {% if postulante.telefono %}
+                    <li class="mb-2">
+                        <i class="bi bi-telephone text-muted"></i>
+                        {{ postulante.telefono }}
+                    </li>
+                    {% endif %}
+                    <li class="mb-2">
+                        <i class="bi bi-calendar text-muted"></i>
+                        Registrado: {{ postulante.created_at.strftime('%d/%m/%Y') }}
+                    </li>
+                </ul>
+
+                {% if postulante.cv_filename %}
+                <hr>
+                <a href="{{ url_for('postulantes.descargar_cv', id=postulante.id) }}" class="btn btn-outline-primary w-100 mb-3">
+                    <i class="bi bi-file-earmark-pdf"></i> Descargar CV
+                </a>
+                {% endif %}
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('postulantes.editar', id=postulante.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form method="post" action="{{ url_for('postulantes.eliminar', id=postulante.id) }}"
+                          onsubmit="return confirm('¿Eliminar este postulante y todas sus postulaciones?')">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perfil extraído del CV -->
+        {% if postulante.cv_texto %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-robot"></i> Perfil extraído del CV</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <strong>Experiencia:</strong>
+                        {% if postulante.experiencia_detectada %}
+                        {{ postulante.experiencia_detectada }} años
+                        {% else %}
+                        <span class="text-muted">No detectada</span>
+                        {% endif %}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Inglés:</strong>
+                        {% if postulante.nivel_ingles_detectado %}
+                        {{ postulante.nivel_ingles_detectado }}
+                        {% else %}
+                        <span class="text-muted">No detectado</span>
+                        {% endif %}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Título universitario:</strong>
+                        {% if postulante.tiene_titulo_detectado %}
+                        <span class="text-success">Sí</span>
+                        {% else %}
+                        <span class="text-muted">No detectado</span>
+                        {% endif %}
+                    </li>
+                </ul>
+
+                {% if postulante.tecnologias_detectadas %}
+                <hr>
+                <strong>Tecnologías:</strong>
+                <div class="mt-2">
+                    {% for tech in postulante.get_tecnologias_detectadas_list() %}
+                    <span class="tech-badge">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Postulaciones -->
+    <div class="col-md-8">
+        <!-- Nueva postulación -->
+        {% if puestos_disponibles %}
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva postulación</h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('postulaciones.crear') }}" class="row g-3 align-items-end">
+                    <input type="hidden" name="postulante_id" value="{{ postulante.id }}">
+                    <div class="col-md-8">
+                        <label class="form-label">Seleccionar puesto</label>
+                        <select name="puesto_id" class="form-select" required>
+                            <option value="">Elegir puesto...</option>
+                            {% for puesto in puestos_disponibles %}
+                            <option value="{{ puesto.id }}">{{ puesto.titulo }} @ {{ puesto.empresa }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-send"></i> Postular
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Historial de postulaciones -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Postulaciones ({{ postulaciones|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if postulaciones %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Puesto</th>
+                                <th>Puntaje</th>
+                                <th>Cumple</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in postulaciones %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('puestos.ver', id=p.puesto.id) }}">
+                                        <strong>{{ p.puesto.titulo }}</strong>
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">{{ p.puesto.empresa }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="puntaje-bar me-2" style="width: 50px;">
+                                            <div class="fill bg-{% if p.puntaje >= 75 %}success{% elif p.puntaje >= 50 %}warning{% else %}danger{% endif %}"
+                                                 style="width: {{ p.puntaje or 0 }}%;"></div>
+                                        </div>
+                                        <small>{{ p.puntaje or 0 }}%</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if p.cumple_requisitos %}
+                                    <span class="badge bg-success"><i class="bi bi-check"></i> Sí</span>
+                                    {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-x"></i> No</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ p.estado.value }}">{{ p.estado }}</span>
+                                </td>
+                                <td>
+                                    <small>{{ p.created_at.strftime('%d/%m/%Y') }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">Este postulante no tiene postulaciones aún</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

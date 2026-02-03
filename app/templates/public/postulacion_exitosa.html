@@ -1,0 +1,74 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}¡Postulación Enviada! - Lastenia HR{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="mb-4">
+                <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                    <i class="bi bi-check-lg text-white" style="font-size: 4rem;"></i>
+                </div>
+            </div>
+
+            <h2 class="fw-bold mb-3">¡Gracias por postularte!</h2>
+
+            <p class="lead text-muted mb-4">
+                Recibimos tu postulación correctamente. Nuestro equipo revisará tu perfil
+                y te contactaremos si coincide con lo que estamos buscando.
+            </p>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4">¿Qué sigue ahora?</h6>
+                    <div class="row text-start">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="width: 40px; height: 40px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <span style="color: var(--accent-color); font-weight: bold;">1</span>
+                                </div>
+                                <div>
+                                    <strong>Revisión</strong>
+                                    <p class="text-muted small mb-0">Analizamos tu CV y experiencia</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="width: 40px; height: 40px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <span style="color: var(--accent-color); font-weight: bold;">2</span>
+                                </div>
+                                <div>
+                                    <strong>Contacto</strong>
+                                    <p class="text-muted small mb-0">Te llamamos para una entrevista</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3" style="width: 40px; height: 40px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <span style="color: var(--accent-color); font-weight: bold;">3</span>
+                                </div>
+                                <div>
+                                    <strong>Proceso</strong>
+                                    <p class="text-muted small mb-0">Te acompañamos hasta el final</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('public.vacantes') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-search"></i> Ver más vacantes
+                </a>
+                <a href="https://www.instagram.com/lasteniahr/" target="_blank" class="btn btn-accent btn-lg">
+                    <i class="bi bi-instagram"></i> Seguinos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

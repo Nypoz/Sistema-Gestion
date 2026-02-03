@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-primary text-white me-3">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ puestos_abiertos }}</h3>
+                    <small class="text-muted">Puestos Abiertos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-success text-white me-3">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_postulantes }}</h3>
+                    <small class="text-muted">Postulantes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-stat">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-info text-white me-3">
+                    <i class="bi bi-file-earmark-person"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_postulaciones }}</h3>
+                    <small class="text-muted">Postulaciones</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Últimas postulaciones -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Últimas Postulaciones</h5>
+            </div>
+            <div class="card-body">
+                {% if ultimas_postulaciones %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Postulante</th>
+                                    <th>Puesto</th>
+                                    <th>Estado</th>
+                                    <th>Puntaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in ultimas_postulaciones %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('postulantes.ver', id=p.postulante.id) }}">
+                                            {{ p.postulante.nombre_completo }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('puestos.ver', id=p.puesto.id) }}">
+                                            {{ p.puesto.titulo }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ p.estado.value }}">{{ p.estado }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="puntaje-bar" style="width: 60px;">
+                                            <div class="fill bg-{% if p.puntaje >= 75 %}success{% elif p.puntaje >= 50 %}warning{% else %}danger{% endif %}"
+                                                 style="width: {{ p.puntaje or 0 }}%;"></div>
+                                        </div>
+                                        <small>{{ p.puntaje or 0 }}%</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">No hay postulaciones aún</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Puestos populares -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-star"></i> Puestos con más postulaciones</h5>
+            </div>
+            <div class="card-body">
+                {% if puestos_populares %}
+                    <ul class="list-group list-group-flush">
+                        {% for puesto in puestos_populares %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{{ url_for('puestos.ver', id=puesto.id) }}">{{ puesto.titulo }}</a>
+                                <br>
+                                <small class="text-muted">{{ puesto.empresa }}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ puesto.postulaciones.count() }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted text-center py-4">No hay puestos abiertos</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="card mt-3">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('puestos.nuevo') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle"></i> Nuevo Puesto
+                    </a>
+                    <a href="{{ url_for('postulantes.nuevo') }}" class="btn btn-outline-success">
+                        <i class="bi bi-person-plus"></i> Nuevo Postulante
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

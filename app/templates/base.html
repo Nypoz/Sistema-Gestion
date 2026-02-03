@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lastenia HR - Admin{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a3a5c;
+            --secondary-color: #2d5a87;
+            --accent-color: #0095f6;
+            --light-accent: #e8f4fc;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+        }
+        .brand-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        .brand-title span {
+            color: var(--accent-color);
+        }
+        .main-content {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card-stat {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .card-stat .card-body {
+            padding: 1.5rem;
+        }
+        .card-stat .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .badge-cumple { background-color: #28a745; }
+        .badge-no-cumple { background-color: #dc3545; }
+        .badge-pendiente { background-color: #6c757d; }
+        .badge-en_revision { background-color: #17a2b8; }
+        .badge-entrevista { background-color: #ffc107; color: #212529; }
+        .badge-aprobado { background-color: #28a745; }
+        .badge-rechazado { background-color: #dc3545; }
+        .puntaje-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        .puntaje-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .tech-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+            margin: 0.125rem;
+            background: var(--light-accent);
+            color: var(--secondary-color);
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: 500;
+        }
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .btn-accent {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        .btn-accent:hover {
+            background-color: #0077cc;
+            border-color: #0077cc;
+            color: white;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse px-0">
+                <div class="p-3">
+                    <h5 class="text-white mb-4 brand-title">
+                        Lastenia<span>HR</span>
+                    </h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+                               href="{{ url_for('main.index') }}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'puestos' in request.endpoint %}active{% endif %}"
+                               href="{{ url_for('puestos.listar') }}">
+                                <i class="bi bi-briefcase"></i> Puestos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'postulantes' in request.endpoint %}active{% endif %}"
+                               href="{{ url_for('postulantes.listar') }}">
+                                <i class="bi bi-person-badge"></i> Postulantes
+                            </a>
+                        </li>
+                    </ul>
+
+                    <hr class="text-white-50 my-3">
+
+                    <!-- Usuario y logout -->
+                    <div class="text-white-50 small px-3 mb-2">
+                        <i class="bi bi-person-circle"></i> {{ current_user.nombre }}
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('public.landing') }}" target="_blank">
+                                <i class="bi bi-globe"></i> Ver sitio público
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.instagram.com/lasteniahr/" target="_blank">
+                                <i class="bi bi-instagram"></i> Instagram
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="py-4">
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

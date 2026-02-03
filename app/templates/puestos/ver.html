@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ puesto.titulo }} - Sistema RRHH{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('puestos.listar') }}">Puestos</a></li>
+            <li class="breadcrumb-item active">{{ puesto.titulo }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <!-- Info del puesto -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h4>{{ puesto.titulo }}</h4>
+                    <span class="badge bg-{% if puesto.estado.value == 'abierto' %}success{% elif puesto.estado.value == 'pausado' %}warning{% else %}secondary{% endif %}">
+                        {{ puesto.estado.value|capitalize }}
+                    </span>
+                </div>
+
+                <h6 class="text-muted mb-3">
+                    <i class="bi bi-building"></i> {{ puesto.empresa }}
+                </h6>
+
+                {% if puesto.descripcion %}
+                <p>{{ puesto.descripcion }}</p>
+                {% endif %}
+
+                <hr>
+
+                <h6>Detalles</h6>
+                <ul class="list-unstyled">
+                    {% if puesto.ubicacion %}
+                    <li><i class="bi bi-geo-alt text-muted"></i> {{ puesto.ubicacion }}</li>
+                    {% endif %}
+                    {% if puesto.modalidad %}
+                    <li><i class="bi bi-laptop text-muted"></i> {{ puesto.modalidad|capitalize }}</li>
+                    {% endif %}
+                    {% if puesto.salario_min or puesto.salario_max %}
+                    <li><i class="bi bi-cash text-muted"></i>
+                        {% if puesto.salario_min and puesto.salario_max %}
+                            ${{ puesto.salario_min|int }} - ${{ puesto.salario_max|int }}
+                        {% elif puesto.salario_min %}
+                            Desde ${{ puesto.salario_min|int }}
+                        {% else %}
+                            Hasta ${{ puesto.salario_max|int }}
+                        {% endif %}
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <hr>
+
+                <h6>Requisitos</h6>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-clock text-muted"></i> {{ puesto.experiencia_minima or 0 }}+ años de experiencia</li>
+                    <li><i class="bi bi-translate text-muted"></i> Inglés: {{ puesto.nivel_ingles }}</li>
+                    <li>
+                        <i class="bi bi-mortarboard text-muted"></i>
+                        Título: {% if puesto.requiere_titulo %}Requerido{% else %}No requerido{% endif %}
+                    </li>
+                </ul>
+
+                {% if puesto.tecnologias %}
+                <h6>Tecnologías</h6>
+                <div class="mb-3">
+                    {% for tech in puesto.get_tecnologias_list() %}
+                    <span class="tech-badge">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('puestos.editar', id=puesto.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Editar puesto
+                    </a>
+
+                    <!-- Cambiar estado -->
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            Cambiar estado
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form method="post" action="{{ url_for('puestos.cambiar_estado', id=puesto.id) }}">
+                                    <input type="hidden" name="estado" value="abierto">
+                                    <button type="submit" class="dropdown-item">Abierto</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form method="post" action="{{ url_for('puestos.cambiar_estado', id=puesto.id) }}">
+                                    <input type="hidden" name="estado" value="pausado">
+                                    <button type="submit" class="dropdown-item">Pausado</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form method="post" action="{{ url_for('puestos.cambiar_estado', id=puesto.id) }}">
+                                    <input type="hidden" name="estado" value="cerrado">
+                                    <button type="submit" class="dropdown-item">Cerrado</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <form method="post" action="{{ url_for('puestos.eliminar', id=puesto.id) }}"
+                          onsubmit="return confirm('¿Eliminar este puesto y todas sus postulaciones?')">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Estadísticas</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3>{{ stats.total }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ stats.cumplen_requisitos }}</h3>
+                        <small class="text-muted">Cumplen</small>
+                    </div>
+                </div>
+                <hr>
+                <small class="text-muted">Por estado:</small>
+                <ul class="list-unstyled mb-0 mt-2">
+                    {% for estado, count in stats.por_estado.items() %}
+                    <li class="d-flex justify-content-between">
+                        <span>{{ estado|replace('_', ' ')|capitalize }}</span>
+                        <span class="badge bg-secondary">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Postulaciones -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Postulaciones</h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filtros -->
+                <form method="get" class="row g-2 mb-3">
+                    <div class="col-auto">
+                        <select name="cumple" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="todos" {% if filtro_cumple == 'todos' %}selected{% endif %}>Todos</option>
+                            <option value="si" {% if filtro_cumple == 'si' %}selected{% endif %}>Cumplen requisitos</option>
+                            <option value="no" {% if filtro_cumple == 'no' %}selected{% endif %}>No cumplen</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="todos" {% if filtro_estado == 'todos' %}selected{% endif %}>Todos los estados</option>
+                            {% for estado in estados %}
+                            <option value="{{ estado.value }}" {% if filtro_estado == estado.value %}selected{% endif %}>
+                                {{ estado }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+
+                {% if postulaciones %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Postulante</th>
+                                <th>Puntaje</th>
+                                <th>Cumple</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in postulaciones %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('postulantes.ver', id=p.postulante.id) }}">
+                                        <strong>{{ p.postulante.nombre_completo }}</strong>
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">{{ p.postulante.email }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="puntaje-bar me-2" style="width: 50px;">
+                                            <div class="fill bg-{% if p.puntaje >= 75 %}success{% elif p.puntaje >= 50 %}warning{% else %}danger{% endif %}"
+                                                 style="width: {{ p.puntaje or 0 }}%;"></div>
+                                        </div>
+                                        <small>{{ p.puntaje or 0 }}%</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if p.cumple_requisitos %}
+                                    <span class="badge bg-success"><i class="bi bi-check"></i></span>
+                                    {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-x"></i></span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ url_for('postulaciones.cambiar_estado', id=p.id) }}" class="d-inline">
+                                        <select name="estado" class="form-select form-select-sm" style="width: auto;"
+                                                onchange="this.form.submit()">
+                                            {% for estado in estados %}
+                                            <option value="{{ estado.value }}" {% if p.estado == estado %}selected{% endif %}>
+                                                {{ estado }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('postulaciones.ver', id=p.id) }}" class="btn btn-sm btn-outline-primary"
+                                       title="Ver detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">No hay postulaciones para este puesto</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}{{ puesto.titulo }} - Lastenia HR{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sticky-form {
+        position: sticky;
+        top: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-4" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white;">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ url_for('public.vacantes') }}" class="text-white-50">Vacantes</a></li>
+                <li class="breadcrumb-item active text-white">{{ puesto.titulo }}</li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold mb-2">{{ puesto.titulo }}</h1>
+        <p class="lead mb-0 opacity-75">
+            <i class="bi bi-building"></i> {{ puesto.empresa }}
+        </p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Detalle del puesto -->
+        <div class="col-lg-7 mb-4">
+            <!-- Quick Info Cards -->
+            <div class="row mb-4">
+                {% if puesto.ubicacion %}
+                <div class="col-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3">
+                        <i class="bi bi-geo-alt fs-4 mb-2" style="color: var(--accent-color);"></i>
+                        <small class="text-muted d-block">Ubicación</small>
+                        <strong>{{ puesto.ubicacion }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+                {% if puesto.modalidad %}
+                <div class="col-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3">
+                        <i class="bi bi-laptop fs-4 mb-2" style="color: var(--accent-color);"></i>
+                        <small class="text-muted d-block">Modalidad</small>
+                        <strong>{{ puesto.modalidad|capitalize }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+                {% if puesto.experiencia_minima %}
+                <div class="col-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3">
+                        <i class="bi bi-clock fs-4 mb-2" style="color: var(--accent-color);"></i>
+                        <small class="text-muted d-block">Experiencia</small>
+                        <strong>{{ puesto.experiencia_minima }}+ años</strong>
+                    </div>
+                </div>
+                {% endif %}
+                {% if puesto.salario_min or puesto.salario_max %}
+                <div class="col-6 col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3">
+                        <i class="bi bi-cash fs-4 mb-2" style="color: var(--accent-color);"></i>
+                        <small class="text-muted d-block">Salario</small>
+                        <strong>
+                            {% if puesto.salario_min and puesto.salario_max %}
+                                ${{ "{:,}".format(puesto.salario_min//1000) }}k-{{ "{:,}".format(puesto.salario_max//1000) }}k
+                            {% elif puesto.salario_min %}
+                                +${{ "{:,}".format(puesto.salario_min//1000) }}k
+                            {% else %}
+                                ${{ "{:,}".format(puesto.salario_max//1000) }}k
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if puesto.descripcion %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-file-text"></i> Descripción</h5>
+                    <p style="white-space: pre-line;">{{ puesto.descripcion }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Requisitos -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-check2-square"></i> Requisitos</h5>
+                    <ul class="list-unstyled mb-0">
+                        {% if puesto.experiencia_minima %}
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="me-3" style="width: 30px; height: 30px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-check" style="color: var(--accent-color);"></i>
+                            </span>
+                            {{ puesto.experiencia_minima }}+ años de experiencia
+                        </li>
+                        {% endif %}
+                        {% if puesto.nivel_ingles and puesto.nivel_ingles.value > 0 %}
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="me-3" style="width: 30px; height: 30px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-check" style="color: var(--accent-color);"></i>
+                            </span>
+                            Inglés nivel {{ puesto.nivel_ingles }}
+                        </li>
+                        {% endif %}
+                        {% if puesto.requiere_titulo %}
+                        <li class="mb-3 d-flex align-items-center">
+                            <span class="me-3" style="width: 30px; height: 30px; border-radius: 50%; background: var(--light-accent); display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-check" style="color: var(--accent-color);"></i>
+                            </span>
+                            Título universitario
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            {% if puesto.tecnologias %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-code-slash"></i> Tecnologías / Conocimientos</h5>
+                    <div>
+                        {% for tech in puesto.get_tecnologias_list() %}
+                        <span class="tech-badge" style="font-size: 0.85rem;">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Formulario de postulación -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow sticky-form">
+                <div class="card-header text-white py-3" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-send"></i> Postularme a esta vacante</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{{ url_for('public.postularme', puesto_id=puesto.id) }}" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Nombre *</label>
+                                <input type="text" name="nombre" class="form-control" required
+                                       placeholder="Tu nombre">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Apellido *</label>
+                                <input type="text" name="apellido" class="form-control" required
+                                       placeholder="Tu apellido">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Email *</label>
+                            <input type="email" name="email" class="form-control" required
+                                   placeholder="tu@email.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Teléfono</label>
+                            <input type="tel" name="telefono" class="form-control"
+                                   placeholder="+54 11 1234-5678">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">CV (PDF o Word) *</label>
+                            <input type="file" name="cv" class="form-control" accept=".pdf,.docx,.doc" required>
+                            <small class="text-muted">Máximo 16MB</small>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-accent btn-lg">
+                                <i class="bi bi-send"></i> Enviar postulación
+                            </button>
+                        </div>
+
+                        <p class="text-muted small mt-3 mb-0 text-center">
+                            Al postularte aceptás que procesemos tu información para esta búsqueda laboral
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
